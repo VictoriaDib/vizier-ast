@@ -30,7 +30,7 @@ class Visit_AST(ast.NodeVisitor):
         print("Delete")
 
     def visit_Assign(self, node: Assign) -> Any:
-        # assign(target, value) -> in(value)
+        # assign(target, value) -> in(value), out(targets introduced in scope)
         print("Assign")
 
     def visit_AugAssign(self, node: AugAssign) -> Any:
@@ -41,10 +41,11 @@ class Visit_AST(ast.NodeVisitor):
         print("AnnAssign")
 
     def visit_For(self, node: For) -> Any:
-        # for(target, itr, body, orelse) -> in(itr) U (in(body) - {taraget}) U in(orselse)
+        # for(target, itr, body, orelse) -> in(itr) U (in(body) - {target}) U in(orselse)
         print("For")
 
     def visit_AsyncFor(self, node: AsyncFor) -> Any:
+        # for(target, iter, body, orelse, type_comment) -> in(itr) U (in(body) - {target}) U in(orelse), out()
         print("AsynchFor")
 
     def visit_While(self, node: While) -> Any: # While can have an or else statement in python
@@ -52,15 +53,19 @@ class Visit_AST(ast.NodeVisitor):
         print("While")
 
     def visit_If(self, node: If) -> Any:
+        # if(test, body, orelse) -> in(test) U in(body) U in(orelse), out()
         print("If")
 
-    def visit_With(self, node: With) -> Any:
+    def visit_With(self, node: With) -> Any: # All items, type_comment is optional?
+        # with(items, body, type_comment) -> in(items) U in(body), out(items)
         print("With")
 
     def visit_AsyncWith(self, node: AsyncWith) -> Any:
+        # AsyncWith(items, body, type_comment) -> in(items) U in(body), out(items)
         print("AsyncWith")
 
-    def visit_Match(self, node: Match) -> Any:
+    def visit_Match(self, node: Match) -> Any: # 
+        # Match(subject, cases) -> in(subject) U in(cases), out()
         print("Match")
 
     def visit_Raise(self, node: Raise) -> Any:
