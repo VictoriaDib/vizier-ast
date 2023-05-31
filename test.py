@@ -2,7 +2,6 @@ from _ast import AST, AnnAssign, Assert, Assign, AsyncFor, AsyncFunctionDef, Asy
 import ast
 from collections import defaultdict, deque
 from typing import Any, Iterator
-from ast_parse import Visitast
 
 class Visit_AST(ast.NodeVisitor):
     def __init__(self):
