@@ -68,21 +68,26 @@ class Visit_AST(ast.NodeVisitor):
         print("Match")
 
     def visit_Raise(self, node: Raise) -> Any:
+        # Raise(exc, cause) -> in(cause) U in(exc), out()
         print("Raise")
 
     def visit_Try(self, node: Try) -> Any:
+        # Try(body, handlers, finalbody) -> in(body) U in(handlers) U in(finalbody), out(body, finalbody) 
         print("Try")
 
     def visit_Assert(self, node: Assert) -> Any:
+        # Assert(test, msg) -> in(message), out()
         print("Assert")
 
     def visit_Import(self, node: Import) -> Any:
+        # Import(names) -> in(names) -> out()
         print("Ipmort")
 
 def main():
     with open("example.py", "r") as source:
         tree = ast.parse(source.read())
 
+    print(ast.dump(tree, indent=4))
     vis = Visit_AST()
     vis.visit(tree)
             
