@@ -1,95 +1,41 @@
 from _ast import AST, AnnAssign, Assert, Assign, AsyncFor, AsyncFunctionDef, AsyncWith, AugAssign, ClassDef, Delete, For, FunctionDef, If, Import, Match, Raise, Return, Try, While, With
+import ast_scope
 import ast
 from collections import defaultdict, deque
 from typing import Any, Iterator
+from matplotlib import pyplot as plt
+import networkx as nx
 
 class Visit_AST(ast.NodeVisitor):
     def __init__(self):
-        self.main_dict_store = defaultdict(list)
-        self.main_dict_load  = defaultdict(list)
+        self.main_dict_store = list()
+        self.main_dict_load = list()
+        self.outside_reads = list()
         self.scope_stack = deque()
         self.reads_stack = deque()
     
-
-    def visit_FunctionDef(self, node: FunctionDef) -> Any:
-        print("Function def")
-
-    def visit_AsyncFunctionDef(self, node: AsyncFunctionDef) -> Any:
-        print("AsynchFucntionDef")
-
-    def visit_ClassDef(self, node: ClassDef) -> Any:
-        print("ClassDef")
-
-    def visit_Return(self, node: Return) -> Any:
-        # Return(value) -> in(value)
-        print("Return")
-
-    def visit_Delete(self, node: Delete) -> Any:
-        # Delete(targets) -> in(targets)
-        print("Delete")
-
-    def visit_Assign(self, node: Assign) -> Any:
-        # assign(target, value) -> in(value), out(targets introduced in scope)
-        print("Assign")
-
-    def visit_AugAssign(self, node: AugAssign) -> Any:
-        # AugAssign(target, op, value) -> in(value) U in(target)
-        print("AugAssign")
-
-    def visit_AnnAssign(self, node: AnnAssign) -> Any:
-        print("AnnAssign")
-
-    def visit_For(self, node: For) -> Any:
-        # for(target, itr, body, orelse) -> in(itr) U (in(body) - {target}) U in(orselse)
-        print("For")
-
-    def visit_AsyncFor(self, node: AsyncFor) -> Any:
-        # for(target, iter, body, orelse, type_comment) -> in(itr) U (in(body) - {target}) U in(orelse), out()
-        print("AsynchFor")
-
-    def visit_While(self, node: While) -> Any: # While can have an or else statement in python
-        # while( test, body, orelse) -> in(test) U in(body) U in(orelse)
-        print("While")
-
-    def visit_If(self, node: If) -> Any:
-        # if(test, body, orelse) -> in(test) U in(body) U in(orelse), out()
-        print("If")
-
-    def visit_With(self, node: With) -> Any: # All items, type_comment is optional?
-        # with(items, body, type_comment) -> in(items) U in(body), out(items)
-        print("With")
-
-    def visit_AsyncWith(self, node: AsyncWith) -> Any:
-        # AsyncWith(items, body, type_comment) -> in(items) U in(body), out(items)
-        print("AsyncWith")
-
-    def visit_Match(self, node: Match) -> Any: # 
-        # Match(subject, cases) -> in(subject) U in(cases), out()
-        print("Match")
-
-    def visit_Raise(self, node: Raise) -> Any:
-        # Raise(exc, cause) -> in(cause) U in(exc), out()
-        print("Raise")
-
-    def visit_Try(self, node: Try) -> Any:
-        # Try(body, handlers, finalbody) -> in(body) U in(handlers) U in(finalbody), out(body, finalbody) 
-        print("Try")
-
-    def visit_Assert(self, node: Assert) -> Any:
-        # Assert(test, msg) -> in(message), out()
-        print("Assert")
-
-    def visit_Import(self, node: Import) -> Any:
-        # Import(names) -> in(names) -> out()
-        print("Ipmort")
+    def parse_ast(self, tree: Any):
+        for node in ast.walk(tree):
+            ##
+            # Go through and if node is x stmnt keep track of certain things according to spec
+            ##
+            if isinstance(node, ast.Name):
+                # Store variables defined in cell
+                if isinstance(node.ctx, ast.Store) and node.id not in self.main_dict_store:
+                    self.main_dict_store.append(node.id)
+                # Variable is not defined in cell, therefore reading from out of cell
+                elif isinstance(node.ctx, ast.Load) and node.id not in self.main_dict_store:
+                    self.outside_reads.append(node.id)
 
 def main():
     with open("example.py", "r") as source:
         tree = ast.parse(source.read())
 
+
     print(ast.dump(tree, indent=4))
     vis = Visit_AST()
-    vis.visit(tree)
+    # vis.visit(tree)
+    vis.parse_ast(tree)
             
         
 if __name__ == '__main__':
