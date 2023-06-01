@@ -22,17 +22,17 @@ AST
      ?
 - For: \
      `For(raget, itr, body, orelse, type_comment) -> in(itr) U (in(body) - {target}) U in(orelse), out()`
-- AsyncFor: \ 
+- AsyncFor: \
      `For(raget, itr, body, orelse, type_comment) -> in(itr) U (in(body) - {target}) U in(orelse), out()`
 - While: \
      `while(test, body, orelse) -> in(test) U in(body) U in(orselse)`
-- If: \ 
+- If: \
      `if(test, body, orelse) -> in(test) U in(body) U in(oresle), out()`
 - With: \
      `with(items, body, type_comment) -> in(items) U in(body), out(items)`
 - AsyncWith: \
      `AsyncWith(items, body, type_comment) -> in(items) U in(body), out(items)`
-- Match: \ 
+- Match: \
      `Match(subject, cases) -> in(subject) U in(cases), out()`
 - Raise: \
      `Raise(exc,cause) -> in(cause) U in(exc), out()`
