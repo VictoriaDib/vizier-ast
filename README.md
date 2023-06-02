@@ -15,19 +15,19 @@ AST
 - Delete: \
      `Delete(targets) -> in(targets)`
 - Assign: \
-     `Assign(target, value) -> in(value), out(targets introduced in scope)`
+     `Assign(target, value) -> in(value), out(target) introduced in scope`
 - AugAssign: \
-     `AugAssign(target, op, value) -> in(value) U in(target)`
+     `AugAssign(target, op, value) -> in(value) U in(target), out(target)`
 - AnnAssign: \
-     ?
+      `?? AnnAssign(target, annotation, value, int) -> in(value) U in(target), out(target)`
 - For: \
-     `For(raget, itr, body, orelse, type_comment) -> in(itr) U (in(body) - {target}) U in(orelse), out()`
+     `For(target, itr, body, orelse, type_comment) -> in(itr) U (in(body) - {target}) U in(orelse), out(body)`
 - AsyncFor: \
-     `For(raget, itr, body, orelse, type_comment) -> in(itr) U (in(body) - {target}) U in(orelse), out()`
+     `For(target, itr, body, orelse, type_comment) -> in(itr) U (in(body) - {target}) U in(orelse), out(body)`
 - While: \
-     `while(test, body, orelse) -> in(test) U in(body) U in(orselse)`
+     `while(test, body, orelse) -> in(test) U in(body) U in(orselse), out()?
 - If: \
-     `if(test, body, orelse) -> in(test) U in(body) U in(oresle), out()`
+     `if(test, body, orelse) -> in(test) U in(body) U in(oresle), out()?'
 - With: \
      `with(items, body, type_comment) -> in(items) U in(body), out(items)`
 - AsyncWith: \
