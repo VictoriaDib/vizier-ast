@@ -13,21 +13,25 @@ class Visit_AST(ast.NodeVisitor):
     
 
     def visit_For(self, node) -> Any:
-        self.scope_stack.appendleft(node.target.id)
+        scope = (node.target.id, "inside", [])
+        self.scope_stack.appendleft(scope)
         super().generic_visit(node)
         self.scope_stack.pop()
 
     def visit_AsyncFor(self,node) -> Any:
-        self.scope_stack.appendleft(node.target.id)
+        scope = (node.target.id, "inside", [])
+        self.scope_stack.appendleft(scope)
         super().generic_visit(node)
         self.scope_stack.pop()
     
     def visit_AugAssign(self, node) -> Any:
-        self.scope_stack.appendleft(node.target.id)
+        scope = (node.target.id, "outside", [])
+        self.scope_stack.appendleft(scope)
         super().generic_visit(node)
 
     def visit_AnnAssign(self, node) -> Any:
-        self.scope_stack.appendleft(node.target.id)
+        scope = (node.target.id, "outside", [])
+        self.scope_stack.appendleft(scope)
         super().generic_visit(node)
 
 
