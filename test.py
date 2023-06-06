@@ -1,11 +1,7 @@
 from _ast import AST, AnnAssign, Assert, Assign, AsyncFor, AsyncFunctionDef, AsyncWith, AugAssign, ClassDef, Delete, For, FunctionDef, If, Import, Match, Name, Raise, Return, Try, While, With
-import pprint
-import ast_scope
 import ast
 from collections import defaultdict, deque
 from typing import Any, Iterator
-from matplotlib import pyplot as plt
-import networkx as nx
 
 class Visit_AST(ast.NodeVisitor):
     def __init__(self):
