@@ -22,12 +22,16 @@ class Visit_AST(ast.NodeVisitor):
         self.scope_stack.pop()
 
     def visit_AsyncFor(self,node) -> Any:
+        self.scope_stack.appendleft(node.target.id)
         super().generic_visit(node)
+        self.scope_stack.pop()
     
     def visit_AugAssign(self, node) -> Any:
+        self.scope_stack.appendleft(node.target.id)
         super().generic_visit(node)
 
     def visit_AnnAssign(self, node) -> Any:
+        self.scope_stack.appendleft(node.target.id)
         super().generic_visit(node)
 
 
