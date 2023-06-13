@@ -10,33 +10,43 @@ class Visit_AST(ast.NodeVisitor):
         self.outside_reads = list()
         self.scope_stack = deque()
         self.reads_stack = deque()
+
+        self.scope_stack.appendleft({})
     
+    def visit_FunctionDef(self, node: FunctionDef) -> Any:
+        ## Need to deal with transitive d3eps here somehow
+        return super().generic_visit(node)
 
     def visit_For(self, node: For) -> Any:
+        ## If it enters a new scope, make a new scope with the current node
         scope = {node.target.id: ("inside", [])}
         self.scope_stack.appendleft(scope)
         super().generic_visit(node)
-        self.scope_stack.pop()
+        self.scope_stack.popleft()
 
     def visit_AsyncFor(self,node: AsyncFor) -> Any:
         scope = {node.target.id: ("inside", [])}
         self.scope_stack.appendleft(scope)
         super().generic_visit(node)
-        self.scope_stack.pop()
+        self.scope_stack.popleft()
     
+    def visit_Assign(self, node: Assign) -> Any: ## NOT DONE
+        ## Since append left puts it in the front, accessing the 0th element gets top o' stack
+        self.scope_stack[0][node.targets[0].id] = ("outside", []) # Targets could be a list so we'd have to iterate over this
+        super().generic_visit(node)
+
     def visit_AugAssign(self, node: AugAssign) -> Any:
-        scope = {node.target.id: ("outside", [])}
-        self.scope_stack.appendleft(scope)
+        self.scope_stack[0][node.target.id] = ("outside", [])
         super().generic_visit(node)
 
     def visit_AnnAssign(self, node: AnnAssign) -> Any:
-        scope = {node.target.id: ("outside", [])}
-        self.scope_stack.appendleft(scope)
+        self.scope_stack[0][node.target.id] = ("outside", [])
         super().generic_visit(node)
 
     def visit_Name(self, node: Name) -> Any:
         if isinstance(node.ctx, ast.Store) :
-            self.main_dict_store.append(node.id)
+            ## Using this because what if we're curreingly in a scope and use a var defined in another scope
+            self.main_dict_store.append(node.id) 
         if isinstance(node.ctx, ast.Load) and node.id not in self.main_dict_store:
             self.outside_reads.append(node.id)
 
@@ -45,11 +55,11 @@ def main():
     with open("example2.py", "r") as source:
         tree = ast.parse(source.read())
 
-    print(ast.dump(tree, indent=4))
+    # print(ast.dump(tree, indent=4))
     vis = Visit_AST()
     vis.visit(tree)
-    print("Scope: ", vis.scope_stack)
-    print("store: ", vis.main_dict_store)
+    # print("Scope: ", vis.scope_stack)
+    # print("store: ", vis.main_dict_store)
     print("Outside Reads:  ", vis.outside_reads)
 
             
