@@ -3,7 +3,13 @@ import ast
 from collections import defaultdict, deque
 from typing import Any, Iterator
 
-class Visit_AST(ast.NodeVisitor):
+
+class Cell_Scope:
+    INSIDE = "inside"
+    OUTSIDE= "outside"
+    EITHER = "either"
+
+class Visit_AST(ast.NodeVisitor, Cell_Scope):
     def __init__(self):
         self.main_dict_store = list()
         self.main_dict_load = list()
@@ -19,28 +25,28 @@ class Visit_AST(ast.NodeVisitor):
 
     def visit_For(self, node: For) -> Any:
         ## If it enters a new scope, make a new scope with the current node
-        scope = {node.target.id: ("inside", [])}
+        scope = {node.target.id: (self.INSIDE, [])}
         self.scope_stack.appendleft(scope)
         super().generic_visit(node)
         self.scope_stack.popleft()
 
     def visit_AsyncFor(self,node: AsyncFor) -> Any:
-        scope = {node.target.id: ("inside", [])}
+        scope = {node.target.id: (self.INSIDE, [])}
         self.scope_stack.appendleft(scope)
         super().generic_visit(node)
         self.scope_stack.popleft()
     
     def visit_Assign(self, node: Assign) -> Any: ## NOT DONE
         ## Since append left puts it in the front, accessing the 0th element gets top o' stack
-        self.scope_stack[0][node.targets[0].id] = ("outside", []) # Targets could be a list so we'd have to iterate over this
+        self.scope_stack[0][node.targets[0].id] = (self.OUTSIDE, []) # Targets could be a list so we'd have to iterate over this
         super().generic_visit(node)
 
     def visit_AugAssign(self, node: AugAssign) -> Any:
-        self.scope_stack[0][node.target.id] = ("outside", [])
+        self.scope_stack[0][node.target.id] = (self.OUTSIDE, [])
         super().generic_visit(node)
 
     def visit_AnnAssign(self, node: AnnAssign) -> Any:
-        self.scope_stack[0][node.target.id] = ("outside", [])
+        self.scope_stack[0][node.target.id] = (self.OUTSIDE, [])
         super().generic_visit(node)
 
     def visit_Name(self, node: Name) -> Any:
