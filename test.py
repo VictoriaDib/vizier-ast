@@ -29,6 +29,11 @@ class Visit_AST(ast.NodeVisitor, Cell_Scope):
 
         self.scope_stack.popleft()  
 
+    # ?? 
+    def visit_Delete(self, node: Delete) -> Any:
+        for target in node.targets:
+            self.generic_visit(target)
+
     def visit_For(self, node: For) -> Any:
         ## If it enters a new scope, make a new scope with the current node
         scope = {node.target.id: self.INSIDE}
@@ -42,6 +47,32 @@ class Visit_AST(ast.NodeVisitor, Cell_Scope):
         super().generic_visit(node)
         self.scope_stack.popleft()
     
+    def visit_If(self, node: If) -> Any:                            
+        scope = {node.test.lineno: self.INSIDE}
+        self.scope_stack.appendleft(scope)
+        self.generic_visit(node.test)
+        self.scope_stack.popleft()
+
+        for i in range(len(node.body)):
+            scope = {node.body[i].lineno: self.INSIDE}
+            self.scope_stack.appendleft(scope)
+            self.generic_visit(node.body[i])
+            self.scope_stack.popleft()
+
+
+        if node.orelse:
+            for i in range(len(node.orelse)):
+                scope = {node.body[i].lineno: self.INSIDE}
+                self.scope_stack.appendleft(scope)
+                self.generic_visit(node.orelse[i])
+                self.scope_stack.popleft()
+     
+        #self.scope_stack.popleft()
+    
+    def visit_While(self, node: While) -> Any:
+        
+        self.generic_visit(node.test)
+
     def visit_Assign(self, node: Assign) -> Any: ## NOT DONE
         ## Since append left puts it in the front, accessing the 0th element gets top o' stack
         self.scope_stack[0][node.targets[0].id] = self.OUTSIDE # Targets could be a list so we'd have to iterate over this
@@ -77,9 +108,9 @@ def main():
     print(ast.dump(tree, indent=4))
     vis = Visit_AST()
     vis.visit(tree)
-    # print("Scope: ", vis.scope_stack)
-    # print("store: ", vis.main_dict_store)
-    # print("Outside Reads:  ", vis.outside_reads)
+    print("Scope: ", vis.scope_stack)
+    print("store: ", vis.main_dict_store)
+    print("Outside Reads:  ", vis.outside_reads)
 
             
         

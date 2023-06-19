@@ -1,12 +1,8 @@
+y = 2 
+if y == 2:
+    x = 2
+    y = 7
+else:
+    x = 1
 
-
-x = 1
-
-y = x
-
-
-foo = [1,2,3,4]
-
-
-for x in range(6):
-    y = y +1
+del y
