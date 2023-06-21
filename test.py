@@ -58,20 +58,34 @@ class Visit_AST(ast.NodeVisitor, Cell_Scope):
             self.scope_stack.appendleft(scope)
             self.generic_visit(node.body[i])
             self.scope_stack.popleft()
-
+        
 
         if node.orelse:
             for i in range(len(node.orelse)):
-                scope = {node.body[i].lineno: self.INSIDE}
+                scope = {node.orelse[i].lineno: self.INSIDE}
                 self.scope_stack.appendleft(scope)
                 self.generic_visit(node.orelse[i])
                 self.scope_stack.popleft()
-     
-        #self.scope_stack.popleft()
-    
+         
     def visit_While(self, node: While) -> Any:
-        
+        scope = {node.test.lineno: self.INSIDE}
+        self.scope_stack.appendleft(scope)
         self.generic_visit(node.test)
+        self.scope_stack.popleft()
+
+        for i in range(len(node.body)):
+            scope = {node.body[i].lineno: self.INSIDE}
+            self.scope_stack.appendleft(scope)
+            self.generic_visit(node.body[i])
+            self.scope_stack.popleft()
+        
+
+        if node.orelse:
+            for i in range(len(node.orelse)):
+                scope = {node.orelse[i].lineno: self.INSIDE}
+                self.scope_stack.appendleft(scope)
+                self.generic_visit(node.orelse[i])
+                self.scope_stack.popleft()
 
     def visit_Assign(self, node: Assign) -> Any: ## NOT DONE
         ## Since append left puts it in the front, accessing the 0th element gets top o' stack
