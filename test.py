@@ -89,14 +89,18 @@ class Visit_AST(ast.NodeVisitor, Cell_Scope):
 
     def visit_Assign(self, node: Assign) -> Any: ## NOT DONE
         ## Since append left puts it in the front, accessing the 0th element gets top o' stack
-        self.scope_stack[0][node.targets[0].id] = self.OUTSIDE # Targets could be a list so we'd have to iterate over this
+      #  self.scope_stack[0][node.targets[0].id] = self.OUTSIDE # Targets could be a list so we'd have to iterate over this
+
+        for n in self.scope_stack[0]:
+            n.id = self.OUTSIDE
+
 
         ## If we get something in a function that is declared outside the scope of the function add it to deps
         if isinstance(node.value, ast.Name) and (node.value.id not in self.scope_stack[0]) and (node.value.id in self.scope_stack[1]):
             for name in self.scope_stack[1]:
                 if isinstance(self.scope_stack[1][name], tuple):
                     self.scope_stack[1][name][1].append(node.value.id)
-        super().generic_visit(node)
+        self().generic_visit(node)
 
     def visit_AugAssign(self, node: AugAssign) -> Any:
         self.scope_stack[0][node.target.id] = self.OUTSIDE
